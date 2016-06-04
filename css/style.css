@@ -1,0 +1,169 @@
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+
+.row > [class*='col-1'] {
+  float: none;
+  display: table-cell;
+  vertical-align: top;
+}
+
+#page {
+  transition: all 0.2s linear 0s;
+  display: block;
+  position: relative;
+}
+
+#page.active {
+  position: fixed;
+  margin-left: 300px;
+  overflow-x: hidden;
+  min-width: 100%;
+}
+
+#app-name {
+  background-color: red;
+}
+
+#menu-icon {
+  /*background-color: yellow;*/
+  margin: auto;
+}
+
+#input-location {
+  /*background-color: orange;*/
+}
+
+#list-search {
+  background-color: green;
+}
+
+#address-input {
+  /*width: 100%;*/
+  background: url(../img/search-button-transparent.png) no-repeat scroll 0px 0px;
+  padding-left: 30px;
+}
+
+.close-icon {
+  border:1px solid transparent;
+	background-color: transparent;
+	display: inline-block;
+	vertical-align: middle;
+  outline: 0;
+  cursor: pointer;
+}
+
+.close-icon:after {
+  content: "X";
+  display: block;
+  width: 15px;
+  height: 15px;
+  position: absolute;
+  background-color: #FA9595;
+  z-index:1;
+  right: 35px;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  padding: 2px;
+  border-radius: 50%;
+  text-align: center;
+  color: white;
+  font-weight: normal;
+  font-size: 12px;
+  box-shadow: 0 0 2px #E50F0F;
+  cursor: pointer;
+}
+
+#address-input:not(:valid) ~ .close-icon {
+	display: none;
+}
+
+/*.submit-form {
+  position: absolute;
+  top: 0px;
+}*/
+
+/*#submit-form {
+  margin-left: 10px;
+  margin-right: 0px;
+  cursor: default;
+  display: inline-block;
+  width: 25px;
+  height: 25px;
+}*/
+
+.offscreen {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+}
+
+#map-view {
+  background-color: blue;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+  /*height: 100%;*/
+}
+
+/*@media screen and (max-width: 992px) {
+  #list-view {
+    display: none;
+  }
+}*/
+
+.side-view {
+  top: 0px;
+  display: block;
+  width: 0px;
+  overflow: hidden;
+  transition: all 0.2s linear 0s;
+  float: left;
+  position: relative;
+  /*background-color: rgba(0, 0, 0, 1.00);*/
+  height: 1vh;
+  overflow-y: auto;
+  z-index: 1000;
+
+}
+
+.side-view.active {
+    display: block;
+    width: 300px;
+    z-index: 99;
+    padding-top: 0px;
+    height: 100vh;
+}
+
+.logo {
+  position: absolute;
+  top: 10px;
+  left: 25px;
+}
+
+.hideSideView {
+  position: absolute;
+  top: 10px;
+  right: 25px;
+}

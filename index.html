@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta name="description" content="My Porfolio Site - Udacity Frontend developer (Project 1)" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <meta charset="utf-8">
+
+    <base target="_blank">
+
+    <title>PTV Timetable</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div class="side-view">
+      <div class="side-view-header">
+        <a class="hideSideView" href="javascript:;">
+          <img class="icon-close" src="img/close-icon.png" alt="Close">
+        </a>
+      </div>
+
+      <div class="" id="list-search">
+        <input type="search" data-bind="value: query, valueUpdate: 'keyup'" autocomplete="off" placeholder="Search..."/>
+        <!-- <button data-bind="click: updateStopsList">Search</button> -->
+      </div>
+      <div id="stops-list">
+        <ul data-bind="template: {name: 'stop-template', foreach:stopList}"></ul>
+        <script type="text/html" id="stop-template">
+          <li class="stop-list-item">
+            <span data-bind="text: result.location_name"></span>
+          </li>
+        </script>
+        <p data-bind="text: query"></p>
+
+      </div>
+    </div>
+
+    <div id="page">
+      <div class="container-fluid" id="table-container">
+        <header class="row" id="header-row">
+          <div class="col-xs-2 col-md-1" id="menu-icon">
+            <a class="showSideView" href="javascript:;">
+              <img class="menu" src="img/burger-menu.png" alt="Menu">
+            </a>
+          </div>
+          <!-- <div class="col-xs-1" id="search-icon">
+            <i class="icon-search"></i>
+          </div> -->
+          <div class="col-xs-10 col-md-11" id="input-location">
+            <form id="form-location" data-bind="submit: updateCenter">
+              <!-- <input type="image" id="submit-form" src="img/search-button-without-text.png"/> -->
+              <input type="text" class="form-control" id="address-input" required placeholder="Type in address"/>
+              <!-- <input type="search" id="address-input" required placeholder="Type in address"/>
+              <button class="close-icon" type="reset"></button> -->
+              <button type="submit" class="offscreen"></button>
+              <!-- <button type="submit">Submit</button> -->
+            </form>
+          </div>
+        </header>
+        <div class="row" id="map-row">
+          <div class="col-xs-12" id="map-view">
+            <div id="map"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript" src="js/lib/jquery-2.2.3.min.js"></script>
+    <script type="text/javascript" src="js/lib/bootstrap-3.3.6.min.js"></script>
+    <script type="text/javascript" src="js/lib/knockout-3.4.0.min.js"></script>
+    <script type="text/javascript" src="js/hmac-sha1.js"></script>
+    <script type="text/javascript" src="js/map.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBf8ksAmVFxAyvr9c8gsb0VUCPZYDNZxms&callback=initMap" async defer></script>
+
+  </body>
+</html>
