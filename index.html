@@ -14,26 +14,30 @@
   </head>
 
   <body>
-    <div class="side-view">
-      <div class="side-view-header">
-        <a class="hideSideView" href="javascript:;">
-          <img class="icon-close" src="img/close-icon.png" alt="Close">
-        </a>
-      </div>
 
-      <div class="" id="list-search">
-        <input type="search" data-bind="value: query, valueUpdate: 'keyup'" autocomplete="off" placeholder="Search..."/>
-        <!-- <button data-bind="click: updateStopsList">Search</button> -->
-      </div>
-      <div id="stops-list">
-        <ul data-bind="template: {name: 'stop-template', foreach:stopList}"></ul>
-        <script type="text/html" id="stop-template">
-          <li class="stop-list-item">
-            <span data-bind="text: result.location_name"></span>
-          </li>
-        </script>
-        <p data-bind="text: query"></p>
-
+    <div class="modal fade" id="stopListModal" tabindex="-1" role="dialog" aria-labelledby="Stops List">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel">Stops List</h4>
+          </div>
+          <div class="modal-body">
+            <div id="list-search">
+              <input type="search" id="stop-search" class="form-control" data-bind="value: query, valueUpdate: 'keyup'" autocomplete="off" placeholder="Search..."/>
+            </div>
+            <div id="stops-list">
+              <div class="list-group" data-bind="template: {name: 'stop-template', foreach:stopList}"></div>
+              <script type="text/html" id="stop-template">
+                <a href="javascript:;" class="list-group-item" data-bind="click: $parent.selectStop.bind($data, $index())">
+                  <span data-bind="text: result.location_name"></span>
+                </a>
+              </script>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="close-modal" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -41,21 +45,15 @@
       <div class="container-fluid" id="table-container">
         <header class="row" id="header-row">
           <div class="col-xs-2 col-md-1" id="menu-icon">
-            <a class="showSideView" href="javascript:;">
-              <img class="menu" src="img/burger-menu.png" alt="Menu">
-            </a>
+            <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#stopListModal">
+              Stops
+            </button>
           </div>
-          <!-- <div class="col-xs-1" id="search-icon">
-            <i class="icon-search"></i>
-          </div> -->
           <div class="col-xs-10 col-md-11" id="input-location">
             <form id="form-location" data-bind="submit: updateCenter">
-              <!-- <input type="image" id="submit-form" src="img/search-button-without-text.png"/> -->
               <input type="text" class="form-control" id="address-input" required placeholder="Type in address"/>
-              <!-- <input type="search" id="address-input" required placeholder="Type in address"/>
-              <button class="close-icon" type="reset"></button> -->
+              <a class="close">×</a>
               <button type="submit" class="offscreen"></button>
-              <!-- <button type="submit">Submit</button> -->
             </form>
           </div>
         </header>

@@ -1,6 +1,11 @@
 
 'use strict';
 
+/**
+ * Model Class
+ *
+ * @class
+ */
 var model = {
   // Constants
   DEVID: 1000770,
@@ -14,12 +19,18 @@ var model = {
   centerMarker: {},
   PTVLocations: [],
   PTVLocationMarkers: [],
+  selectedPTVLocations: [],
   centerAddress: {}
 };
 
+/**
+ * Octopus (Controller) Class
+ *
+ * @class
+ */
 var octopus = {
   /**
-   *
+   * Octopus initialisation function
    */
   init: function() {
     viewModel.init();
@@ -33,7 +44,7 @@ var octopus = {
     //octopus.initMap();
   },
   /**
-   *
+   * PTV API health check call
    */
   PTVHealthCheck: function() {
     // Build URL
@@ -50,7 +61,7 @@ var octopus = {
     });
   },
   /**
-   *
+   * Set center of map at new provided address
    */
   setNewCenterAddress: function(address) {
     model.geocoder.geocode( {'address': address}, function(results, status) {
@@ -69,7 +80,7 @@ var octopus = {
     });
   },
   /**
-   *
+   * Show "You're here" marker at provided location
    */
   setCenterMarker: function(coord) {
     // First, remove any previous center marker
@@ -85,12 +96,13 @@ var octopus = {
     });
   },
   /**
-   *
+   * Update Stop List visible in map
    */
   updateStopList: function() {
     var showLocation;
     viewModel.stopList.removeAll();
     if (model.PTVLocations) {
+      model.selectedPTVLocations = []; // Start with empty list
       model.PTVLocations.forEach( function(location, index, arr) {
         showLocation = false; // by default
         if (viewModel.query() != '') {
@@ -102,10 +114,15 @@ var octopus = {
         };
         if(showLocation && model.map.getBounds().contains(model.PTVLocationMarkers[index].getPosition())) {
            viewModel.stopList.push(location);
+           model.selectedPTVLocations.push(index);
         };
       });
     }
   },
+  /**
+   * Initial map setup, setting center with geolocation and adding markers
+   * for PTV locations.
+   */
   initMap: function() {
     // Get current location to center inital map
     if (navigator.geolocation) {
@@ -132,12 +149,17 @@ var octopus = {
       // ToDo -> Dialog with Message
     }
   },
-  renderLocationTimetable: function (location, marker, infoWindow) {
+  /**
+   * Display Timetable for a specific location in an infoWindow
+   */
+  renderLocationTimetable: function (location, marker) {
     var iwContent;
     // Location type
     var stop_type;
     var time_service;
     var blineNumber = false;
+    var infoWindow = new google.maps.InfoWindow();
+
     switch (location.result.route_type) {
       case 0: // Train
         stop_type = 'Metro Train';
@@ -190,7 +212,16 @@ var octopus = {
     });
   },
   /**
-   *
+   * Display Timeetable in a location, provided the id in the list of stops
+   */
+  renderLocationTimetableByIndex: function(id) {
+    if(id <= model.selectedPTVLocations.length) {
+      var locationIdx = model.selectedPTVLocations[id];
+      octopus.renderLocationTimetable(model.PTVLocations[locationIdx], model.PTVLocationMarkers[locationIdx]);
+    }
+  },
+  /**
+   * Add markers for PTV location markers around current location or provided address
    */
   addPTVLocationMarkers: function(coord) {
      // First, remove any previous PTV location markers
@@ -246,12 +277,11 @@ var octopus = {
            });
            model.PTVLocations.push(location);
            model.PTVLocationMarkers.push(marker);
-           infoWindow = new google.maps.InfoWindow();
-           marker.addListener('click', (function(mk, iw, loc) {
+           marker.addListener('click', (function(mk, loc) {
              return function() {
-               octopus.renderLocationTimetable(loc, mk, iw);
+               octopus.renderLocationTimetable(loc, mk);
              };
-           })(marker, infoWindow, location));
+           })(marker, location));
          };
        });
        // Finally, update Stop List in side view
@@ -264,9 +294,14 @@ var octopus = {
    }
 };
 
+/**
+ * viewModel Class
+ *
+ * @class
+ */
 var viewModel = {
   /**
-   *
+   * viewModel initialisation
    */
   init: function() {
 
@@ -286,35 +321,60 @@ var viewModel = {
         return false;
       }
     });
+
+    $('#stopListModal').on('hidden.bs.modal', function(e) {
+      viewModel.resetStopList();
+    });
+
+    $('#close-modal').click( function() {
+
+    });
+
+    $('.close').click( function() {
+      viewModel.resetAddressInput();
+    });
     viewModel.query.subscribe(viewModel.updateStopList);
   },
   /**
-   *
+   * Mofify map dimensions, according to window sizing
    */
   setMapViewSize: function() {
     $('#map-view').height($(window).height() - $('#header-row').height());
     $('#map-view').width($('#table-container').width());
   },
   /**
-   *
+   * Get address input and move map center
    */
   updateCenter: function() {
     var newAddress = $('#address-input').val();
     octopus.setNewCenterAddress(newAddress);
   },
   query: ko.observable(''),
-  getQuery: function(){
-    return viewModel.query;
-  },
   stopList: ko.observableArray(),
   /**
-   *
+   * Update stop list to be shown (with changes in query and visibility)
    */
   updateStopList: function() {
     octopus.updateStopList();
   },
   /**
-   *
+   * Set blan query to show all visible stops
+   */
+  resetStopList: function() {
+    $('#stop-search').val('');
+    viewModel.query('');
+    octopus.updateStopList();
+  },
+  /*
+   * Called when stop selected from list
+   */
+  selectStop: function(index) {
+    console.log('Selected Stop', index);
+    octopus.renderLocationTimetableByIndex(index);
+    $('#close-modal').trigger('click');
+},
+  /**
+   * Set address input filed to blank
    */
   resetAddressInput: function() {
     $('#address-input').val('');
