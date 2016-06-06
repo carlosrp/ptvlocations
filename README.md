@@ -18,8 +18,8 @@ A couple of notes when testing this app:
     * Chapel St, Prahran
 
 Future improvements:
-  - Timetable API call is done with only 1 values returned, per service and direction; this is good at the CBD, so the InfoWindows are not huge, but not so good at the suburbs, where there would be room for 3-5 services. Is it possible to manage infoWindo size, so it can scroll in the CBD where there are many services?
-  - Tried to deploy this app into Github Pages and Google App Engine; unfortunately, both sites use HTTPS and won't allow AJAX requests done in HPTT (they don't work in HTTPS).
+  - Timetable API call is done with only 1 value returned, per service and direction; this is good at the CBD, so the InfoWindows are not huge, but not so good at the suburbs, where there would be room for 3-5 services. Is it possible to manage infoWindow size, so it can scroll in the CBD where there are many services?
+  - Tried to deploy this app into Github Pages and Google App Engine; unfortunately, both sites use HTTPS and won't allow AJAX requests done in HTTP (they don't work in HTTPS).
   - Issues with Bootstrap grid layout in Safari (iOS and OS X)
 
 (c) Carlos Rodriguez - Melbourne, Australia - 2016
