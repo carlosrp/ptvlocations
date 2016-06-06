@@ -12,10 +12,10 @@ var model = {
   SECKEY: 'ffda6266-2156-11e6-a0ce-06f54b901f07',
   BASE_URL: 'http://timetableapi.ptv.vic.gov.au',
   MAX_TT_ENTRIES: 1,
+  DEFAULT_LOCATION: {lat: -37.814, lng: 144.963}, // Melbourne CBD by default
   // Variables
   map: {},
   geocoder: {},
-  currentLocation: {lat: -37.814, lng: 144.963}, // Melbourne CBD by default
   centerMarker: {},
   PTVLocations: [],
   PTVLocationMarkers: [],
@@ -35,13 +35,11 @@ var octopus = {
   init: function() {
     viewModel.init();
     $(window).resize( function() {
-      setMapViewSize();
+      viewModel.setMapViewSize();
       var center = model.map.getCenter();
       google.maps.event.trigger(model.map, 'resize');
       model.map.setCenter(center);
-      //getMapBounds();
     });
-    //octopus.initMap();
   },
   /**
    * PTV API health check call
@@ -68,11 +66,8 @@ var octopus = {
       if (status == google.maps.GeocoderStatus.OK) {
         // Set new center in map
         model.map.setCenter(results[0].geometry.location);
-        // octopus.getMapBounds();
         // Update center Marker
         octopus.setCenterMarker(results[0].geometry.location);
-        // update PTV location markers around center coordinates
-        //addPTVLocationMarkers(results[0].geometry.location);
       } else {
         console.log('Geocode unsuccessful:', status);
       }
@@ -125,30 +120,35 @@ var octopus = {
    */
   initMap: function() {
     // Get current location to center inital map
+    var pos;
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition( function(position) {
-        var pos = {
+        pos = {
           lat: position.coords.latitude,
           lng: position.coords.longitude
         };
 
-        viewModel.setMapViewSize();
-        // Initialise map
-        model.geocoder = new google.maps.Geocoder();
-        model.map = new google.maps.Map(document.getElementById('map'), {center: pos, zoom: 17});
-        //getMapBounds();
-        //octopus.setCenterMarker(pos);
-        model.map.addListener('idle', function() {
-          // Add Markers for PTV locations around center
-          octopus.addPTVLocationMarkers({lat: model.map.getCenter().lat(), lng: model.map.getCenter().lng()});
-        });
+      }, function() {
+        // Geolocation not supported, or permsission not provided
+        alert("We could not locate where you are; please use the address input instead");
       });
     } else {
-      // Geolocation not supported, or permsission not provided
-      console.log('Geolocation not available');
-      // ToDo -> Dialog with Message
+      // Geolocation not supported
+      alert("We could not locate where you are; please use the address input instead");
     }
-  },
+    viewModel.setMapViewSize();
+    // Initialise map
+    model.geocoder = new google.maps.Geocoder();
+    if (!pos) {
+      pos = model.DEFAULT_LOCATION;
+    }
+    model.map = new google.maps.Map(document.getElementById('map'), {center: pos, zoom: 17});
+
+    model.map.addListener('idle', function() {
+      // Add Markers for PTV locations around center
+      octopus.addPTVLocationMarkers({lat: model.map.getCenter().lat(), lng: model.map.getCenter().lng()});
+    });
+},
   /**
    * Display Timetable for a specific location in an infoWindow
    */
@@ -289,7 +289,7 @@ var octopus = {
      })
      .fail(function() {
        console.log('Error in API call');
-       // ToDo -> Dialog with Message
+       alert('Error with PTV API; please, check your internet connection');
      });
    }
 };
@@ -369,7 +369,6 @@ var viewModel = {
    * Called when stop selected from list
    */
   selectStop: function(index) {
-    console.log('Selected Stop', index);
     octopus.renderLocationTimetableByIndex(index);
     $('#close-modal').trigger('click');
 },

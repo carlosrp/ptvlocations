@@ -33,22 +33,22 @@ html, body {
   min-width: 100%;
 }
 
-#app-name {
-  background-color: red;
-}
-
 #menu-icon {
-  /*background-color: yellow;*/
   margin: auto;
 }
 
-#input-location {
-  /*background-color: orange;*/
+/*#table-container {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
 }
 
-#list-search {
-  /*background-color: green;*/
-}
+#table-container col-md-*, #table-container col-xs-* {
+}*/
 
 #address-input {
   /*width: 100%;*/
