@@ -33,7 +33,7 @@ function getIcon(route_type) {
 
 /**
  * Location class, including all members required for that location (e.g., name, stop_id, latLng, etc.)
- * and the Marker and infoWindow
+ * and the Marker
  *
  * @param loc - Returned single record from Nearme API call
  */
@@ -56,9 +56,6 @@ var Location = function(loc) {
       loc.animateMarker();
     };
   })(this));
-  // info window
-  this.infoWindow = new google.maps.InfoWindow();
-  this.infoWindowContent = ko.observable('Loading Timetable...');
 };
 
 /**
@@ -89,7 +86,6 @@ var model = {
   geocoder: {},
   centerMarker: {},
   PTVLocations: [],
-  // PTVLocationMarkers: [],
   selectedPTVLocations: [],
   centerAddress: {}
 };
@@ -188,7 +184,7 @@ var octopus = {
            location.marker.setVisible(true);
         } else {
           location.marker.setVisible(false);
-          location.infoWindow.close(); // so it's not left over when hiding marker
+          //viewModel.infoWindow.close(); // so it's not left over when hiding marker
         }
       });
     }
@@ -226,6 +222,10 @@ var octopus = {
     model.map.addListener('idle', function() {
       // Add Markers for PTV locations around center
       octopus.addPTVLocationMarkers({lat: model.map.getCenter().lat(), lng: model.map.getCenter().lng()});
+      // Create infoWindow object if it was not created before
+      if (!viewModel.infoWindow.length) {
+        viewModel.infoWindow = new google.maps.InfoWindow();
+      }
     });
 },
   /**
@@ -241,6 +241,10 @@ var octopus = {
     var time_service;
     var blineNumber = false;
 
+    // Close any previously shown infoWindow
+    // if (viewModel.infoWindow.length) {
+    //   viewModel.infoWindow.close();
+    // }
     switch (location.route_type) {
       case 0: // Train
         stop_type = 'Metro Train';
@@ -285,11 +289,13 @@ var octopus = {
         iwContent += rec.platform.direction.direction_name + '</td><td>' + time_service.toTimeString().slice(0,8) + '</td></tr>';
       });
       iwContent += '</table>';
-      location.infoWindow.setOptions({
+      viewModel.infoWindow.setOptions({
         content: iwContent,
-        disableAutoPan: true
+        // disableAutoPan: true
+        disableAutoPan: false
       });
-      location.infoWindow.open(model.map, location.marker);
+      viewModel.infoWindow.close();
+      viewModel.infoWindow.open(model.map, location.marker);
     })
     .fail(function() {
       console.log('Error in API call');
@@ -331,7 +337,6 @@ var octopus = {
       // Crate Location object, which includes marker
       var location = new Location(loc);
       model.PTVLocations.push(location);
-      console.log('after adding location', model.PTVLocations.length);
     }
 },
   /**
@@ -341,7 +346,7 @@ var octopus = {
    */
   addPTVLocationMarkers: function(coord) {
      // First, remove any previous PTV location markers that is NOT LONGER VISIBLE
-     // (this will prevent marker still visibe, and its infoWindows, from disappearing)
+     // (this will prevent marker still visibe, and infoWindow, from disappearing)
      if (model.PTVLocations) {
        for (var i = model.PTVLocations.length-1; i >= 0; i -= 1) {
          if (!model.map.getBounds().contains(model.PTVLocations[i].marker.getPosition())) {
@@ -385,25 +390,19 @@ var viewModel = {
    * viewModel initialisation
    */
   init: function() {
-
-    $('#address-input').keypress( function(e) {
-      if (e.which == 13) { //enter key
-        $('#form-location').submit();
-        return false;
-      }
-    });
-
-    $('#stopListModal').on('hidden.bs.modal', function(e) {
-      viewModel.resetStopList();
-    });
-
-    $('.close').click( function() {
-      viewModel.resetAddressInput();
-    });
     viewModel.query.subscribe(viewModel.updateStopList);
   },
+  closeAddress: function() {
+    viewModel.resetAddressInput();
+  },
   /**
-   * Mofify map dimensions, according to window sizing
+   * Reset address input when list is closed
+   */
+  closeStopList: function() {
+    viewModel.resetStopList();
+  },
+  /**
+   * Modify map dimensions, according to window sizing
    */
   setMapViewSize: function() {
     $('#map-view').height($(window).height() - $('#header-row').height());
@@ -413,9 +412,9 @@ var viewModel = {
    * Get address input and move map center
    */
   updateCenter: function() {
-    var newAddress = $('#address-input').val();
-    octopus.setNewCenterAddress(newAddress);
+    octopus.setNewCenterAddress(viewModel.newAddress());
   },
+  newAddress: ko.observable(''),
   query: ko.observable(''),
   stopList: ko.observableArray(),
   /**
@@ -428,9 +427,9 @@ var viewModel = {
    * Set blank query to show all visible stops
    */
   resetStopList: function() {
-    $('#stop-search').val('');
     viewModel.query('');
-    octopus.updateStopList();
+    // Not needed? =>
+    //octopus.updateStopList();
   },
   /*
    * Called when stop selected from list
@@ -452,7 +451,9 @@ var viewModel = {
    */
   errorMap: function() {
     alert('Error loading map. Please, check your internet connection');
-  }
+  },
+  // info window -> Only one shown in map (it can only be created after async google maps call is done)
+  infoWindow: {}
 };
 
 ko.applyBindings(viewModel);

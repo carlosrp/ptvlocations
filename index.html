@@ -23,7 +23,8 @@
           </div>
           <div class="modal-body">
             <div id="list-search">
-              <input type="search" id="stop-search" class="form-control" data-bind="value: query, valueUpdate: 'keyup'" autocomplete="off" placeholder="Search..."/>
+              <!-- <input type="search" id="stop-search" class="form-control" data-bind="value: query, valueUpdate: 'keyup'" autocomplete="off" placeholder="Search..."/> -->
+              <input type="search" id="stop-search" class="form-control" data-bind="textInput: query" autocomplete="off" placeholder="Search..."/>
             </div>
             <div id="stops-list">
               <div class="list-group" data-bind="template: {name: 'stop-template', foreach:stopList}"></div>
@@ -35,7 +36,7 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" id="close-modal" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" id="close-modal" class="btn btn-default" data-dismiss="modal" data-bind="click: closeStopList">Close</button>
           </div>
         </div>
       </div>
@@ -51,8 +52,8 @@
           </div>
           <div class="col-xs-10 col-md-11" id="input-location">
             <form id="form-location" data-bind="submit: updateCenter">
-              <input type="text" class="form-control" id="address-input" required placeholder="Type in address"/>
-              <a class="close">×</a>
+              <input type="text" class="form-control" id="address-input" data-bind="value: newAddress" required placeholder="Type in address..."/>
+              <a href="javascript:;" class="close" data-bind="click: closeAddress">×</a>
               <button type="submit" class="offscreen"></button>
             </form>
           </div>

@@ -12,10 +12,12 @@ Information about PTV stops and timetable is pulled via the PTV API (very well d
 
 ##How to use it
 
-1. Initially, the app shows the stops around your location, if geolocation was successful, or in the Melbourne CBD, if it wasn't.
-2. Click on any PTV location to show the next services in that stops
-3. You can zoom and pan to see other stops around
-4. Type in an address to go to that location and see PTV stops around there (provided it is in Victoria...)
+1. Clone code from https://github.com/carlosrp/ptvlocations.git
+2. Run simple web server (npm's htt-server or python -m SimpleHTTPServer) or open index.html
+3. Initially, the app shows the stops around your location, if geolocation was successful, or in the Melbourne CBD, if it wasn't.
+4. Click on any PTV location to show the next services in that stops
+5. You can zoom and pan to see other stops around
+6. Type in an address to go to that location and see PTV stops around there (provided it is in Victoria...)
 
 ##Some notes
 
