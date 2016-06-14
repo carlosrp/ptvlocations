@@ -52,7 +52,11 @@ var Location = function(loc) {
   });
   this.marker.addListener('click', (function(loc) {
     return function() {
+      // Center map on marker, once returned timetable
+      model.map.panTo(loc.marker.getPosition());
+      // Show infoWindow with PTV timetable
       octopus.renderLocationTimetable(loc);
+      // Animate marker
       loc.animateMarker();
     };
   })(this));
@@ -70,9 +74,7 @@ Location.prototype.animateMarker = function() {
 };
 
 /**
- * Model Class
- *
- * @class
+ * Model Object
  */
 var model = {
   // Constants
@@ -91,9 +93,7 @@ var model = {
 };
 
 /**
- * Octopus (Controller) Class
- *
- * @class
+ * Octopus (Controller) Object
  */
 var octopus = {
   /**
@@ -222,10 +222,6 @@ var octopus = {
     model.map.addListener('idle', function() {
       // Add Markers for PTV locations around center
       octopus.addPTVLocationMarkers({lat: model.map.getCenter().lat(), lng: model.map.getCenter().lng()});
-      // Create infoWindow object if it was not created before
-      if (!viewModel.infoWindow.length) {
-        viewModel.infoWindow = new google.maps.InfoWindow();
-      }
     });
 },
   /**
@@ -237,8 +233,8 @@ var octopus = {
   renderLocationTimetable: function (location) {
     var iwContent;
     // Location type
-    var stop_type;
-    var time_service;
+    var stopType;
+    var timeService;
     var blineNumber = false;
 
     // Close any previously shown infoWindow
@@ -247,28 +243,27 @@ var octopus = {
     // }
     switch (location.route_type) {
       case 0: // Train
-        stop_type = 'Metro Train';
+        stopType = 'Metro Train';
         break;
       case 1: // Tram
-        stop_type = 'Tram';
+        stopType = 'Tram';
         blineNumber = true;
         break;
       case 2: // Metro Bus
-        stop_type = 'Metro Bus';
+        stopType = 'Metro Bus';
         blineNumber = true;
         break;
       case 3: // v/Line Train & Coach => DO NOT SHOW!
-        stop_type = 'vLine';
+        stopType = 'vLine';
         blineNumber = true;
         break;
       case 4: // night bus
-        stop_type = 'Nightrider';
+        stopType = 'Nightrider';
         blineNumber = true;
         break;
       default:
-        stop_type = 'Unknown';
+        stopType = 'Unknown';
     }
-    iwContent = '<p><b>' + stop_type + ' Stop </b><br>(' + location.name + ')</p>';
     // Build Location Timetable API requestt:
     var var_url = '/v2/mode/' + location.route_type +
                   '/stop/' + location.stop_id +
@@ -277,7 +272,12 @@ var octopus = {
     var hash = CryptoJS.HmacSHA1( var_url, model.SECKEY);
     // -> Full URL
     var url_all = model.BASE_URL + var_url + '&signature=' + hash.toString();
+    // First, open infoWindow with Loading message
+    iwContent = '<p>Loading timetable...</p>';
+    viewModel.infoWindow.setOptions({content: iwContent, disaableAutoPan: false});
+    viewModel.infoWindow.open(model.map, location.marker);
     // PTV API request
+    iwContent = '<p><b>' + stopType + ' Stop </b><br>(' + location.name + ')</p>';
     $.getJSON(url_all, function(data) {
       iwContent += '<table><thead><tr><th>To:</th><th>Time:</th></thead>';
       data.values.forEach( function(rec, index, arr) {
@@ -285,8 +285,8 @@ var octopus = {
         if (blineNumber) {
           iwContent += rec.platform.direction.line.line_number + ' - ';
         }
-        time_service = new Date(rec.time_timetable_utc);
-        iwContent += rec.platform.direction.direction_name + '</td><td>' + time_service.toTimeString().slice(0,8) + '</td></tr>';
+        timeService = new Date(rec.time_timetable_utc);
+        iwContent += rec.platform.direction.direction_name + '</td><td>' + timeService.toTimeString().slice(0,8) + '</td></tr>';
       });
       iwContent += '</table>';
       viewModel.infoWindow.setOptions({
@@ -294,8 +294,6 @@ var octopus = {
         // disableAutoPan: true
         disableAutoPan: false
       });
-      viewModel.infoWindow.close();
-      viewModel.infoWindow.open(model.map, location.marker);
     })
     .fail(function() {
       console.log('Error in API call');
@@ -381,15 +379,16 @@ var octopus = {
 };
 
 /**
- * viewModel Class
- *
- * @class
+ * viewModel object
  */
 var viewModel = {
   /**
    * viewModel initialisation
    */
   init: function() {
+    // Create one infoWindow, shared by all clicked markers
+    viewModel.infoWindow = new google.maps.InfoWindow();
+    // When query changes, update Stop List automatically
     viewModel.query.subscribe(viewModel.updateStopList);
   },
   closeAddress: function() {
@@ -460,10 +459,11 @@ ko.applyBindings(viewModel);
 
 //PTVHealthCheck();
 
-// Init app
-octopus.init();
 
 // Callback function for Google Maps API
 function initMap() {
+  // Init app: called ONLY after google map api async call returns
+  octopus.init();
+  // Initialise map contents
   octopus.initMap();
 }
